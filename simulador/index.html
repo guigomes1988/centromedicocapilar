@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0A090C">
+<meta name="theme-color" content="#0B0909">
 <meta name="robots" content="noindex">
 <title>Simulador Capilar CMC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,12 +12,12 @@
 <style>
 /* Layout: coluna única de quiz, uma pergunta por tela, tema escuro premium da família de LPs de cirurgia */
 :root{
-  --bg:#0A090C; --surface:#131117; --surface-2:#1A1720;
+  --bg:#0B0909; --surface:#141112; --surface-2:#1C1718;
   --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.18);
-  --text:#F4F3F1; --text-2:#B4AFBC; --text-3:#8A8494;
-  --acc:#C9B2EE; --acc-soft:rgba(201,178,238,.10); --acc-dp:#8E66C6;
+  --text:#F4F3F1; --text-2:#B8AFAF; --text-3:#8C8484;
+  --acc:#F0565C; --acc-soft:rgba(240,86,92,.10); --acc-dp:#B81D24;
   --cta:#D2232A; --cta-lt:#E8464C; --ok:#5CC08A; --wa:#25D366; --plan:#E6BC72;
-  --hair:#C9B2EE; --skin:#2A2530;
+  --hair:#E0666B; --skin:#2C2424;
   --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --font-d:'Inter Tight','Inter',system-ui,sans-serif;
   --font-s:'Instrument Serif',Georgia,serif;
@@ -112,7 +112,7 @@ h2{font-size:clamp(1.6rem,6vw,2.2rem)}
 .row span{color:var(--text-2);font-size:.9rem}
 .row b{font:600 1.05rem var(--font-d);font-variant-numeric:tabular-nums;text-align:right}
 .row--big b{font-size:1.5rem;color:var(--text)}
-.promo{margin:0;padding:18px 20px;background:linear-gradient(135deg,rgba(210,35,42,.16),rgba(201,178,238,.08));display:grid;gap:4px}
+.promo{margin:0;padding:18px 20px;background:linear-gradient(135deg,rgba(210,35,42,.16),rgba(240,86,92,.06));display:grid;gap:4px}
 .promo strong{font:600 1rem var(--font-d)}
 .promo em{font-style:normal;font-size:.8rem;color:var(--text-2)}
 .plan{padding:20px;border-bottom:1px solid var(--line);display:grid;gap:14px}
@@ -325,7 +325,7 @@ var VIEWS = {
   idade: function(){ return choice('idade', [['18 a 24 anos'],['25 a 34 anos'],['35 a 44 anos'],['45 anos ou mais']], 'Qual a sua idade?', 'A idade ajuda o médico a prever como a calvície ainda pode evoluir.', 2); },
   grau: function(){
     return '<section class="screen"><div class="step-n">Etapa 3 de 5</div><h2>Qual imagem mais parece com <span class="serif">a sua cabeça</span>?</h2>'+
-      '<p class="lede">Vista de cima, com a testa voltada para cima. As áreas em lilás têm cabelo. Na dúvida, escolha a mais próxima: o médico confirma pelas fotos.</p>'+
+      '<p class="lede">Vista de cima, com a testa voltada para cima. As áreas em vermelho têm cabelo. Na dúvida, escolha a mais próxima: o médico confirma pelas fotos.</p>'+
       '<div class="nw-grid">'+Object.keys(CONFIG.tabela).map(function(k){ var t=CONFIG.tabela[k];
         return '<button type="button" class="nw'+(S.grau===k?' is-on':'')+'" data-v="'+k+'">'+head(k)+'<b>'+t.nome+'</b><span>'+t.desc+'</span></button>'; }).join('')+'</div>'+
       '<p class="small">Escala de Hamilton-Norwood, usada para classificar a calvície masculina.</p></section>';
