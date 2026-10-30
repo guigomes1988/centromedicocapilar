@@ -65,6 +65,16 @@ Enviados para o `dataLayer` com `lp: 'simulador-transplante'`:
 `cta_nao_agora`, `objecao`, `cta_grupo`, `cta_comercial_duvida`, `mk_ajuste`, `mk_flip`,
 `mk_ia_start`, `mk_ia_done`, `mk_ia_error`.
 
+## Publicação
+
+O GitHub Pages publica automaticamente a cada push na `main` que altere a pasta `simulador/`
+(workflow em `.github/workflows/pages.yml`). Também dá para rodar manualmente em **Actions → Deploy no GitHub Pages → Run workflow**.
+
+- Simulador: https://guigomes1988.github.io/centromedicocapilar/simulador/
+- A raiz do site redireciona para o simulador.
+
+Configuração única no repositório: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
 ## Rodar localmente
 
 ```bash
