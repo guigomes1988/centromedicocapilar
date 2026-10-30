@@ -32,8 +32,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.035;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .wrap{max-width:600px;margin:0 auto;padding-block:20px 56px;display:flex;flex-direction:column;gap:20px}
 .top{display:flex;align-items:center;gap:12px;justify-content:space-between}
-.brand{font:600 .82rem/1 var(--font-d);letter-spacing:.14em;text-transform:uppercase;color:var(--text-2)}
-.brand b{color:var(--text)}
+.brand{display:block;line-height:0}
+.brand img{display:block;height:34px;width:auto;max-width:100%}
 .back{background:none;border:1px solid var(--line-2);color:var(--text-2);border-radius:999px;padding:8px 14px;font:500 .85rem var(--font);cursor:pointer;min-height:40px}
 .back:hover{color:var(--text);border-color:var(--text-3)}
 .bar{height:3px;background:var(--line);border-radius:3px;overflow:hidden}
@@ -167,7 +167,7 @@ h2{font-size:clamp(1.6rem,6vw,2.2rem)}
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><b>Centro Médico</b> Capilar</div>
+    <div class="brand"><img src="assets/logo-cmc.png" width="512" height="114" alt="Centro Médico Capilar"></div>
     <button class="back" id="back" type="button" hidden>← Voltar</button>
   </header>
   <div class="bar" aria-hidden="true"><i id="bar"></i></div>
