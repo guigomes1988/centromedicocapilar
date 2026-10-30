@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A090C">
+<meta name="robots" content="noindex">
+<title>Simulador Capilar CMC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: coluna única de quiz, uma pergunta por tela, tema escuro premium da família de LPs de cirurgia */
+:root{
+  --bg:#0A090C; --surface:#131117; --surface-2:#1A1720;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.18);
+  --text:#F4F3F1; --text-2:#B4AFBC; --text-3:#8A8494;
+  --acc:#C9B2EE; --acc-soft:rgba(201,178,238,.10); --acc-dp:#8E66C6;
+  --cta:#D2232A; --cta-lt:#E8464C; --ok:#5CC08A; --wa:#25D366; --plan:#E6BC72;
+  --hair:#C9B2EE; --skin:#2A2530;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-d:'Inter Tight','Inter',system-ui,sans-serif;
+  --font-s:'Instrument Serif',Georgia,serif;
+  --r-sm:10px; --r:14px; --r-lg:22px;
+  --ease:cubic-bezier(.22,1,.36,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-height:100%}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:600px;margin:0 auto;padding-block:20px 56px;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.brand{font:600 .82rem/1 var(--font-d);letter-spacing:.14em;text-transform:uppercase;color:var(--text-2)}
+.brand b{color:var(--text)}
+.back{background:none;border:1px solid var(--line-2);color:var(--text-2);border-radius:999px;padding:8px 14px;font:500 .85rem var(--font);cursor:pointer;min-height:40px}
+.back:hover{color:var(--text);border-color:var(--text-3)}
+.bar{height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .5s var(--ease)}
+.step-n{font:500 .78rem var(--font);color:var(--text-3);font-variant-numeric:tabular-nums}
+
+.screen{display:flex;flex-direction:column;gap:18px;animation:in .45s var(--ease)}
+@keyframes in{from{opacity:.0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.tag{display:flex;align-items:center;gap:10px;font:600 .72rem var(--font);letter-spacing:.18em;text-transform:uppercase;color:var(--acc)}
+.tag::before{content:"";width:22px;height:1px;background:var(--acc)}
+h1,h2{font-family:var(--font-d);font-weight:600;letter-spacing:-.035em;line-height:1.02;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.1rem,8vw,3.1rem)}
+h2{font-size:clamp(1.6rem,6vw,2.2rem)}
+.serif{font-family:var(--font-s);font-style:italic;font-weight:400;letter-spacing:-.01em;color:var(--acc)}
+.lede{color:var(--text-2);margin:0;max-width:52ch}
+.small{font-size:.84rem;color:var(--text-3);margin:0}
+
+.btn{appearance:none;border:0;border-radius:999px;min-height:54px;padding:14px 26px;font:600 1rem var(--font-d);letter-spacing:-.01em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;transition:transform .2s var(--ease),background .2s}
+.btn:active{transform:scale(.98)}
+.btn--cta{background:var(--cta);color:#fff}
+.btn--cta:hover{background:var(--cta-lt)}
+.btn--wa{background:var(--wa);color:#06210F}
+.btn--ghost{background:transparent;color:var(--text-2);border:1px solid var(--line-2)}
+.btn--ghost:hover{color:var(--text)}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn svg{width:20px;height:20px}
+.btn:focus-visible,.opt:focus-visible,.nw:focus-visible,.back:focus-visible,input:focus-visible,select:focus-visible,.slot:focus-within{outline:2px solid var(--acc);outline-offset:3px}
+.reassure{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.82rem;color:var(--text-3)}
+.reassure span::before{content:"✓ ";color:var(--ok)}
+
+.hero-figs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hero-figs svg{width:100%;height:auto}
+
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:var(--r);padding:16px 18px;font:500 1rem var(--font);cursor:pointer;min-height:56px;transition:border-color .2s,background .2s}
+.opt:hover{border-color:var(--line-2)}
+.opt.is-on{border-color:var(--acc);background:var(--acc-soft)}
+.opt small{color:var(--text-3);font-size:.82rem}
+
+.nw-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:520px){.nw-grid{grid-template-columns:repeat(4,1fr)}}
+.nw{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 8px 10px;cursor:pointer;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .2s,background .2s}
+.nw:hover{border-color:var(--line-2)}
+.nw.is-on{border-color:var(--acc);background:var(--acc-soft)}
+.nw svg{width:84px;height:auto}
+.nw b{font:600 .92rem var(--font-d)}
+.nw span{font-size:.72rem;color:var(--text-3);text-align:center;line-height:1.25}
+
+.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:520px){.slots{grid-template-columns:repeat(3,1fr)}}
+.slot{position:relative;aspect-ratio:1;max-width:100%;border:1px dashed var(--line-2);border-radius:var(--r);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;overflow:hidden;text-align:center;padding:8px}
+.slot input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.slot svg{width:44px;height:44px}
+.slot b{font:600 .88rem var(--font-d)}
+.slot span{font-size:.72rem;color:var(--text-3)}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot.is-done{border-style:solid;border-color:var(--ok)}
+.slot .ok{position:absolute;top:6px;right:6px;background:var(--ok);color:#062;border-radius:999px;font:700 .7rem var(--font);padding:3px 8px;z-index:1}
+.tips{display:grid;gap:6px;margin:0;padding:14px 16px;background:var(--surface);border-radius:var(--r);border:1px solid var(--line);font-size:.86rem;color:var(--text-2);list-style:none}
+.tips li::before{content:"·  ";color:var(--acc)}
+
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font:500 .85rem var(--font);color:var(--text-2)}
+.field input,.field select{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--text);padding:14px 14px;font:400 1rem var(--font);min-height:52px;width:100%}
+.field .err{font-size:.8rem;color:var(--cta-lt);min-height:1em}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:.82rem;color:var(--text-3)}
+.consent input{margin-top:3px;accent-color:var(--acc)}
+
+.result{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.result__head{display:flex;gap:16px;align-items:center;padding:20px;border-bottom:1px solid var(--line)}
+.result__head svg{width:76px;flex:none}
+.result__head h3{margin:0;font:600 1.35rem/1.1 var(--font-d);letter-spacing:-.02em}
+.result__head p{margin:4px 0 0;font-size:.86rem;color:var(--text-2)}
+.rows{display:grid;gap:1px;background:var(--line)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;background:var(--surface);padding:14px 20px}
+.row span{color:var(--text-2);font-size:.9rem}
+.row b{font:600 1.05rem var(--font-d);font-variant-numeric:tabular-nums;text-align:right}
+.row--big b{font-size:1.5rem;color:var(--text)}
+.promo{margin:0;padding:18px 20px;background:linear-gradient(135deg,rgba(210,35,42,.16),rgba(201,178,238,.08));display:grid;gap:4px}
+.promo strong{font:600 1rem var(--font-d)}
+.promo em{font-style:normal;font-size:.8rem;color:var(--text-2)}
+.plan{padding:20px;border-bottom:1px solid var(--line);display:grid;gap:14px}
+.plan__t{margin:0;font:600 1rem var(--font-d)}
+.plan__figs{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.plan__figs figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.plan__figs svg{width:100%;max-width:140px;height:auto}
+.plan__figs figcaption{font:500 .78rem var(--font);color:var(--text-2);letter-spacing:.04em;text-transform:uppercase}
+.plan__arrow{color:var(--text-3);font-size:1.4rem}
+.ph{position:relative;width:100%;max-width:420px;margin:0 auto;border-radius:var(--r);overflow:hidden;background:#000}
+.ph img{display:block;width:100%;height:100%;object-fit:fill}
+.ph svg{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.ph svg.is-ia{cursor:default;touch-action:auto}
+.ph svg:active{cursor:grabbing}
+.ph__hint{position:absolute;left:10px;bottom:10px;right:10px;background:rgba(10,9,12,.72);color:#F4F3F1;font-size:.76rem;padding:6px 10px;border-radius:8px;text-align:center;pointer-events:none}
+.mk-ctrl{display:grid;gap:10px}
+.mk-ctrl label{display:flex;align-items:center;gap:12px;font-size:.84rem;color:var(--text-2)}
+.mk-ctrl input[type=range]{flex:1;accent-color:var(--plan)}
+.mk-btns{display:flex;flex-wrap:wrap;gap:8px}
+.legend{display:grid;gap:8px;margin:0;padding:0;list-style:none;font-size:.84rem;color:var(--text-2)}
+.legend li{display:flex;gap:10px;align-items:center}
+.legend i{width:16px;height:16px;border-radius:4px;flex:none}
+.sw-front{background:var(--plan)}
+.sw-crown{background:repeating-linear-gradient(45deg,var(--plan) 0 2px,transparent 2px 5px);border:1px solid var(--plan)}
+.sw-line{border-top:2px dashed var(--text);height:0!important;border-radius:0!important}
+.note{display:flex;gap:10px;font-size:.8rem;color:var(--text-3);padding:14px 20px;border-top:1px solid var(--line);margin:0}
+.cta-stack{display:grid;gap:10px}
+.split{height:1px;background:var(--line)}
+
+.ia{border:1px solid var(--line-2);border-radius:var(--r);padding:16px;display:grid;gap:10px;background:var(--surface)}
+.ia__top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ia__top b{font:600 .95rem var(--font-d)}
+.ia p{margin:0;font-size:.88rem;color:var(--text-2)}
+.ia__res{display:flex;gap:14px;align-items:center}
+.ia__res svg{width:64px;flex:none}
+.ia__res strong{display:block;font:600 1.15rem var(--font-d)}
+.pill{display:inline-block;font:600 .7rem var(--font);letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 9px;border:1px solid var(--line-2);color:var(--text-2)}
+.pill--alta{border-color:var(--ok);color:var(--ok)}
+.pill--media{border-color:var(--acc);color:var(--acc)}
+.pill--baixa{border-color:var(--cta-lt);color:var(--cta-lt)}
+.btn--sm{min-height:44px;padding:10px 18px;font-size:.9rem}
+.dots::after{content:"";animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.dev{border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;font-size:.82rem;color:var(--text-3)}
+.dev summary{cursor:pointer;font-weight:500;color:var(--text-2)}
+.dev pre{white-space:pre-wrap;word-break:break-word;font:400 .75rem/1.5 ui-monospace,Menlo,monospace;color:var(--text-2);margin:10px 0 0;max-height:320px;overflow:auto}
+.badge-mvp{display:inline-block;font:600 .66rem var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--acc);border:1px solid var(--acc);border-radius:999px;padding:3px 8px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b>Centro Médico</b> Capilar</div>
+    <button class="back" id="back" type="button" hidden>← Voltar</button>
+  </header>
+  <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+  <main id="app" aria-live="polite"></main>
+  <details class="dev" id="dev">
+    <summary>Dados do lead <span class="badge-mvp">MVP</span></summary>
+    <pre id="payload">Preencha o quiz para ver o payload que iria para a planilha / CRM.</pre>
+  </details>
+</div>
+
+<script>
+/* ===== CONFIG: tudo que a clínica ajusta mês a mês ===== */
+var CONFIG = {
+  whatsapp: '5519999999999',                         // [CONFIRMAR] comercial
+  grupo: 'https://chat.whatsapp.com/CONFIRMAR',      // [CONFIRMAR] grupo de ofertas
+  endpoint: '',                                      // Apps Script /exec (vazio no MVP)
+  iaEndpoint: '',                                    // PRODUÇÃO: URL do seu backend que chama a API do Claude. Vazio = motor de teste do Claude.ai
+  token: 'cmc-simulador-2026',
+  promo: { titulo: 'Condição especial deste mês', texto: '10% de desconto à vista ou parcelamento em até 18x sem juros' }, // [CONFIRMAR]
+  parcelas: 18,
+  rotacaoInicial: 180,                               // graus. 180 = testa para baixo, como nas fotos de topo que a clínica recebe
+  // Valores de EXEMPLO. Substituir pela tabela real da clínica.
+  tabela: {
+    '1':  { nome:'Grau 1',  enx:null,         preco:null,           desc:'Sem calvície aparente' },
+    '2':  { nome:'Grau 2',  enx:[1200,1800],  preco:[11000,14000],  desc:'Leve entrada nas têmporas' },
+    '3':  { nome:'Grau 3',  enx:[1800,2500],  preco:[13000,17000],  desc:'Entradas profundas' },
+    '3V': { nome:'Grau 3V', enx:[2200,2800],  preco:[15000,19000],  desc:'Entradas + coroa' },
+    '4':  { nome:'Grau 4',  enx:[2500,3200],  preco:[17000,22000],  desc:'Frente e coroa separadas' },
+    '5':  { nome:'Grau 5',  enx:[3000,3800],  preco:[20000,26000],  desc:'Faixa fina entre áreas' },
+    '6':  { nome:'Grau 6',  enx:[3500,4500],  preco:[24000,30000],  desc:'Frente e coroa unidas' },
+    '7':  { nome:'Grau 7',  enx:[4500,5500],  preco:[28000,35000],  desc:'Apenas laterais e nuca' }
+  }
+};
+
+/* ===== Ilustração Norwood (vista de cima, frente para cima) ===== */
+var NW = {
+  '1': {f:[20,3],t:0,c:0},  '2': {f:[20,6],t:7,c:0},  '3': {f:[21,9],t:11,c:0},
+  '3V':{f:[21,9],t:11,c:9}, '4': {f:[23,15],t:12,c:12},'5': {f:[25,21],t:13,c:16},
+  '6': {f:[27,33],t:14,c:18,fy:30}, '7': {f:[31,40],t:15,c:20,fy:40}
+};
+var uid = 0;
+/* Plano ilustrativo: área frontal em destaque, coroa hachurada (depende da doadora) */
+function temCoroaK(k){ return NW[k].c > 0 || k === '6' || k === '7'; }
+/* Zonas de tratamento em coordenadas do molde (cabeça vista de cima, 100x110). op = opacidade do preenchimento */
+function zonas(k, id, op){
+  var p = NW[k], fy = p.fy || 14, coroa = temCoroaK(k), corte = (k === '6' || k === '7') ? 46 : 50;
+  var bald = '<ellipse cx="50" cy="'+fy+'" rx="'+p.f[0]+'" ry="'+p.f[1]+'" fill="#fff"/>';
+  if (p.t) bald += '<circle cx="31" cy="22" r="'+p.t+'" fill="#fff"/><circle cx="69" cy="22" r="'+p.t+'" fill="#fff"/>';
+  if (p.c) bald += '<circle cx="50" cy="66" r="'+p.c+'" fill="#fff"/>';
+  return {
+    bald: bald,
+    defs: '<mask id="'+id+'b"><rect x="-20" y="-20" width="140" height="150" fill="#000"/>'+bald+'</mask>'+
+      '<clipPath id="'+id+'c"><ellipse cx="50" cy="58" rx="38" ry="46"/></clipPath>'+
+      '<clipPath id="'+id+'f"><rect width="100" height="'+corte+'"/></clipPath>'+
+      '<clipPath id="'+id+'k"><rect y="'+corte+'" width="100" height="'+(110-corte)+'"/></clipPath>'+
+      '<pattern id="'+id+'x" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="var(--plan)"/></pattern>',
+    body: '<g clip-path="url(#'+id+'c)"><g clip-path="url(#'+id+'f)"><rect width="100" height="110" fill="var(--plan)" opacity="'+op+'" mask="url(#'+id+'b)"/></g>'+
+      (coroa ? '<g clip-path="url(#'+id+'k)"><rect width="100" height="110" fill="url(#'+id+'x)" mask="url(#'+id+'b)"/></g>' : '')+'</g>'
+  };
+}
+function linhaFrontal(sw){ return '<path d="M24 24 Q50 9 76 24" fill="none" stroke="var(--text)" stroke-width="'+sw+'" stroke-dasharray="3 2.5" stroke-linecap="round"/>'; }
+function headPlan(k){
+  var id = 'p' + (uid++), z = zonas(k, id, .9);
+  return '<svg viewBox="0 0 100 110" role="img" aria-label="Plano ilustrativo do '+CONFIG.tabela[k].nome+'">'+
+    '<defs><mask id="'+id+'h"><ellipse cx="50" cy="58" rx="38" ry="46" fill="#fff"/>'+z.bald.replace(/#fff/g,'#000')+'</mask>'+z.defs+'</defs>'+
+    '<path d="M44 12 L50 3 L56 12Z" fill="var(--text-3)"/>'+
+    '<ellipse cx="50" cy="58" rx="40" ry="48" fill="var(--skin)" stroke="var(--line-2)"/>'+
+    '<ellipse cx="50" cy="58" rx="38" ry="46" fill="var(--hair)" opacity=".85" mask="url(#'+id+'h)"/>'+
+    z.body + linhaFrontal(1.4) + '</svg>';
+}
+function planoBloco(k){
+  if (k === '1') return '';
+  var temCoroa = temCoroaK(k);
+  return '<div class="plan"><p class="plan__t">Onde o transplante costuma atuar no '+CONFIG.tabela[k].nome+'</p>'+
+    '<div class="plan__figs"><figure>'+head(k)+'<figcaption>Hoje</figcaption></figure><span class="plan__arrow" aria-hidden="true">→</span>'+
+    '<figure>'+headPlan(k)+'<figcaption>Área de tratamento</figcaption></figure></div>'+
+    '<ul class="legend"><li><i class="sw-front"></i>Frente e entradas: área que costuma ter prioridade</li>'+
+    (temCoroa ? '<li><i class="sw-crown"></i>Coroa: depende de quanto a área doadora permite</li>' : '')+
+    '<li><i class="sw-line"></i>Nova linha frontal, desenhada pelo médico</li></ul>'+
+    '<p class="small">Ilustração esquemática, não é uma simulação do seu resultado. A área tratada é definida pelo médico na avaliação.</p></div>';
+}
+function head(k){
+  var p = NW[k], id = 'm' + (uid++), fy = p.fy || 14;
+  var bald = '<ellipse cx="50" cy="'+fy+'" rx="'+p.f[0]+'" ry="'+p.f[1]+'" fill="#000"/>';
+  if (p.t) bald += '<circle cx="31" cy="22" r="'+p.t+'" fill="#000"/><circle cx="69" cy="22" r="'+p.t+'" fill="#000"/>';
+  if (p.c) bald += '<circle cx="50" cy="66" r="'+p.c+'" fill="#000"/>';
+  return '<svg viewBox="0 0 100 110" role="img" aria-label="Ilustração do '+CONFIG.tabela[k].nome+'">'+
+    '<defs><mask id="'+id+'"><ellipse cx="50" cy="58" rx="38" ry="46" fill="#fff"/>'+bald+'</mask></defs>'+
+    '<path d="M44 12 L50 3 L56 12Z" fill="var(--text-3)"/>'+
+    '<ellipse cx="50" cy="58" rx="40" ry="48" fill="var(--skin)" stroke="var(--line-2)"/>'+
+    '<ellipse cx="50" cy="58" rx="38" ry="46" fill="var(--hair)" opacity=".85" mask="url(#'+id+')"/>'+
+    '</svg>';
+}
+
+/* ===== Estado ===== */
+var S = { tempo:null, idade:null, grau:null, fotos:{}, blobs:{}, ia:{status:'idle'}, iaGrauOriginal:null, dims:{}, mk:{modo:'molde', cx:null, cy:null, sc:null, rot:null, ia:{status:'idle'}}, nome:'', whats:'', cidade:'', decisao:null, objecao:null };
+var steps = ['intro','tempo','idade','grau','fotos','contato','resultado','objecao'];
+var cur = 0;
+var $app = document.getElementById('app');
+
+function track(ev, d){ window.dataLayer = window.dataLayer || []; window.dataLayer.push(Object.assign({event:ev, lp:'simulador-transplante'}, d||{}));
+  if (window.fbq && ev==='generate_lead') fbq('track','Lead'); }
+
+function brl(n){ return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}); }
+function fimDoMes(){ var d=new Date(); var u=new Date(d.getFullYear(), d.getMonth()+1, 0); return u.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
+function primeiro(n){ return (n||'').trim().split(' ')[0]; }
+function utms(){ var q=new URLSearchParams(location.search), o={}; ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid','gclid'].forEach(function(k){ if(q.get(k)) o[k]=q.get(k); }); return o; }
+
+function payload(){
+  var t = CONFIG.tabela[S.grau] || {};
+  return Object.assign({ token:CONFIG.token, nome:S.nome, whatsapp:S.whats, cidade:S.cidade,
+    tempo_queda:S.tempo, idade:S.idade, grau_autoavaliado:S.grau,
+    enxertos_estimados:t.enx ? t.enx.join('–') : null,
+    faixa_valor:t.preco ? t.preco.map(brl).join(' a ') : null,
+    fotos_enviadas:Object.keys(S.fotos).length + '/5',
+    ia_grau_sugerido:S.ia.data ? S.ia.data.grau : null, ia_confianca:S.ia.data ? S.ia.data.confianca : null,
+    ia_area_doadora:S.ia.data ? S.ia.data.area_doadora : null, ia_observacoes:S.ia.data ? S.ia.data.observacoes : null,
+    decisao:S.decisao, objecao:S.objecao, pagina:location.href, data:new Date().toISOString() }, utms());
+}
+function refreshPayload(){ document.getElementById('payload').textContent = JSON.stringify(payload(), null, 2); }
+
+function go(i){ cur = i; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function next(){ go(cur+1); }
+
+function render(){
+  var s = steps[cur];
+  document.getElementById('back').hidden = (cur===0 || cur>=6);
+  var prog = Math.min(cur, 6) / 6 * 100;
+  document.getElementById('bar').style.width = prog + '%';
+  $app.innerHTML = VIEWS[s]();
+  if (BIND[s]) BIND[s]();
+  refreshPayload();
+}
+document.getElementById('back').addEventListener('click', function(){ if(cur>0) go(cur-1); });
+
+function choice(key, list, title, sub, n){
+  return '<section class="screen"><div class="step-n">Etapa '+n+' de 5</div><h2>'+title+'</h2>'+(sub?'<p class="lede">'+sub+'</p>':'')+
+    '<div class="opts">'+list.map(function(o){ return '<button type="button" class="opt'+(S[key]===o[0]?' is-on':'')+'" data-k="'+key+'" data-v="'+o[0]+'">'+o[0]+(o[1]?'<small>'+o[1]+'</small>':'')+'</button>'; }).join('')+'</div></section>';
+}
+function bindChoice(){
+  $app.querySelectorAll('.opt').forEach(function(b){ b.addEventListener('click', function(){
+    S[b.dataset.k] = b.dataset.v; track('quiz_answer',{q:b.dataset.k,a:b.dataset.v}); setTimeout(next, 180); }); });
+}
+
+var VIEWS = {
+  intro: function(){
+    return '<section class="screen"><div class="tag">Avaliação online gratuita</div>'+
+      '<h1>Descubra seu grau de calvície e <span class="serif">quanto custa</span> o seu transplante</h1>'+
+      '<p class="lede">Responda 5 etapas rápidas, compare sua cabeça com a escala usada pelos médicos e veja na hora a estimativa de enxertos e a faixa de investimento para o seu caso.</p>'+
+      '<div class="hero-figs" aria-hidden="true">'+['2','3V','5','7'].map(head).join('')+'</div>'+
+      '<button class="btn btn--cta" id="start" type="button">Quero ver o valor do meu caso</button>'+
+      '<div class="reassure"><span>Grátis e sem compromisso</span><span>Cerca de 2 minutos</span><span>Dados protegidos (LGPD)</span></div></section>';
+  },
+  tempo: function(){ return choice('tempo', [['Menos de 1 ano'],['De 1 a 3 anos'],['De 3 a 5 anos'],['Mais de 5 anos']], 'Há quanto tempo você percebe a queda?', null, 1); },
+  idade: function(){ return choice('idade', [['18 a 24 anos'],['25 a 34 anos'],['35 a 44 anos'],['45 anos ou mais']], 'Qual a sua idade?', 'A idade ajuda o médico a prever como a calvície ainda pode evoluir.', 2); },
+  grau: function(){
+    return '<section class="screen"><div class="step-n">Etapa 3 de 5</div><h2>Qual imagem mais parece com <span class="serif">a sua cabeça</span>?</h2>'+
+      '<p class="lede">Vista de cima, com a testa voltada para cima. As áreas em lilás têm cabelo. Na dúvida, escolha a mais próxima: o médico confirma pelas fotos.</p>'+
+      '<div class="nw-grid">'+Object.keys(CONFIG.tabela).map(function(k){ var t=CONFIG.tabela[k];
+        return '<button type="button" class="nw'+(S.grau===k?' is-on':'')+'" data-v="'+k+'">'+head(k)+'<b>'+t.nome+'</b><span>'+t.desc+'</span></button>'; }).join('')+'</div>'+
+      '<p class="small">Escala de Hamilton-Norwood, usada para classificar a calvície masculina.</p></section>';
+  },
+  fotos: function(){
+    var slots = [['frente','Frente','Testa e entradas'],['cima','Cima','Topo da cabeça'],['nuca','Nuca','Parte de trás'],['lat-e','Lateral esq.','Perfil esquerdo'],['lat-d','Lateral dir.','Perfil direito']];
+    var n = Object.keys(S.fotos).length;
+    return '<section class="screen"><div class="step-n">Etapa 4 de 5</div><h2>Envie <span class="serif">5 fotos</span> para o médico confirmar seu grau</h2>'+
+      '<p class="lede">Com as fotos, sua avaliação fica pronta sem precisar repetir nada no WhatsApp.</p>'+
+      '<div class="slots">'+slots.map(function(s){ var f=S.fotos[s[0]];
+        return '<label class="slot'+(f?' is-done':'')+'">'+(f?'<img src="'+f+'" alt="Foto: '+s[1]+'"><span class="ok">OK</span>':
+          '<svg viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><b>'+s[1]+'</b><span>'+s[2]+'</span>')+
+          '<input type="file" accept="image/*" capture="environment" data-slot="'+s[0]+'" id="f-'+s[0]+'" aria-label="Foto '+s[1]+'"></label>'; }).join('')+'</div>'+
+      iaBox() +
+      '<ul class="tips"><li>Cabelo seco e sem gel ou boné</li><li>Ambiente claro, de preferência luz natural</li><li>Peça ajuda para a foto de cima e da nuca</li></ul>'+
+      '<button class="btn btn--cta" id="go-fotos" type="button">'+(n?'Continuar com '+n+' de 5 fotos':'Continuar')+'</button>'+
+      '<button class="btn btn--ghost" id="skip-fotos" type="button">Enviar as fotos depois pelo WhatsApp</button></section>';
+  },
+  contato: function(){
+    return '<section class="screen"><div class="step-n">Etapa 5 de 5</div><h2>Para onde enviamos <span class="serif">sua estimativa</span>?</h2>'+
+      '<p class="lede">O resultado aparece na próxima tela. Seus dados ficam só com a equipe da clínica.</p>'+
+      '<form id="form" novalidate class="opts">'+
+        '<div class="field"><label for="nome">Nome</label><input id="nome" autocomplete="name" value="'+S.nome+'"><div class="err" id="e-nome"></div></div>'+
+        '<div class="field"><label for="whats">WhatsApp com DDD</label><input id="whats" inputmode="tel" autocomplete="tel" placeholder="(11) 91234-5678" value="'+S.whats+'"><div class="err" id="e-whats"></div></div>'+
+        '<div class="field"><label for="cidade">Unidade mais perto de você</label><select id="cidade"><option value="">Selecione</option>'+
+          ['São Paulo','Campinas','Rio de Janeiro','Belo Horizonte','Curitiba','Outra cidade'].map(function(c){ return '<option'+(S.cidade===c?' selected':'')+'>'+c+'</option>'; }).join('')+
+        '</select><div class="err" id="e-cidade"></div></div>'+
+        '<label class="consent"><input type="checkbox" id="lgpd" checked> Aceito receber o contato da clínica sobre minha avaliação.</label>'+
+        '<input type="text" id="_honey" tabindex="-1" autocomplete="off" hidden>'+
+        '<button class="btn btn--cta" type="submit">Ver meu resultado</button>'+
+      '</form></section>';
+  },
+  resultado: function(){
+    var t = CONFIG.tabela[S.grau], nm = primeiro(S.nome), jovem = S.idade==='18 a 24 anos';
+    var corpo;
+    if (!t.preco){
+      corpo = '<div class="rows"><div class="row"><span>Indicação provável</span><b>Tratamento clínico</b></div></div>'+
+        '<p class="note">Nesse estágio o transplante costuma não ser indicado. Um tratamento clínico pode segurar a queda e o médico avalia se vale acompanhar.</p>';
+    } else {
+      var parc = Math.round(t.preco[0] / CONFIG.parcelas);
+      corpo = '<div class="rows">'+
+        '<div class="row"><span>Enxertos estimados</span><b>'+t.enx[0].toLocaleString('pt-BR')+' a '+t.enx[1].toLocaleString('pt-BR')+'</b></div>'+
+        '<div class="row row--big"><span>Investimento estimado</span><b>'+brl(t.preco[0])+' a '+brl(t.preco[1])+'</b></div>'+
+        '<div class="row"><span>Parcelado</span><b>a partir de '+CONFIG.parcelas+'x de '+brl(parc)+'</b></div></div>'+
+        '<div class="promo"><strong>'+CONFIG.promo.titulo+'</strong><span>'+CONFIG.promo.texto+'</span><em>Válida até '+fimDoMes()+'</em></div>'+
+        '<p class="note">Estimativa baseada na sua autoavaliação. O valor final depende da área doadora e é confirmado pelo médico na avaliação.'+(jovem?' Abaixo de 25 anos a calvície ainda costuma evoluir, por isso o médico avalia com cuidado redobrado.':'')+'</p>';
+    }
+    return '<section class="screen"><div class="tag">'+(nm?nm+', este é o seu resultado':'Seu resultado')+'</div>'+
+      '<div class="result"><div class="result__head">'+(S.grau==='1'?head(S.grau):'')+'<div><h3>'+t.nome+' na escala Norwood</h3><p>'+t.desc+' · '+Object.keys(S.fotos).length+' de 5 fotos enviadas</p></div></div>'+planoBloco(S.grau)+fotoMarcada()+corpo+'</div>'+
+      '<div class="cta-stack"><a class="btn btn--wa" id="cta-com" target="_blank" rel="noopener" href="'+waComercial()+'">'+waIcon()+'Quero garantir essa condição</a>'+
+      '<button class="btn btn--ghost" id="cta-nao" type="button">Ainda não é o momento</button></div>'+
+      '<p class="small">Ao tocar, você fala com um consultor que já recebe seu resultado'+(Object.keys(S.fotos).length<5?' e pede as fotos que faltam':'')+'.</p></section>';
+  },
+  objecao: function(){
+    var r = S.objecao, recuperavel = (r==='Tenho dúvidas sobre o procedimento' || r==='Tenho receio da cirurgia');
+    var lista = [['Achei o valor acima do esperado'],['Preciso me planejar financeiramente'],['Tenho dúvidas sobre o procedimento'],['Tenho receio da cirurgia'],['Outro motivo']];
+    var h = '<section class="screen"><div class="tag">Sem problema</div><h2>O que mais <span class="serif">pesou</span> na sua decisão?</h2>'+
+      '<p class="lede">Sua resposta ajuda a clínica a montar condições que façam sentido para você.</p>'+
+      '<div class="opts">'+lista.map(function(o){ return '<button type="button" class="opt'+(r===o[0]?' is-on':'')+'" data-obj="'+o[0]+'">'+o[0]+'</button>'; }).join('')+'</div>';
+    if (r){
+      h += '<div class="split"></div>';
+      if (recuperavel){
+        h += '<p class="lede">Dúvidas e receios são normais antes de uma cirurgia. Um consultor pode explicar cada etapa, sem compromisso de fechar nada.</p>'+
+          '<a class="btn btn--wa" target="_blank" rel="noopener" id="cta-duv" href="'+waComercial(r)+'">'+waIcon()+'Tirar minhas dúvidas</a>';
+      }
+      h += '<p class="lede">Entre no grupo VIP e seja o primeiro a receber as próximas condições especiais. Só avisos da clínica, sem conversa paralela.</p>'+
+        '<a class="btn '+(recuperavel?'btn--ghost':'btn--wa')+'" target="_blank" rel="noopener" id="cta-grupo" href="'+CONFIG.grupo+'">'+waIcon()+'Entrar no grupo de condições especiais</a>';
+    }
+    return h + '</section>';
+  }
+};
+
+function waIcon(){ return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.2 1.4 2.5 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.2Z"/></svg>'; }
+
+function waComercial(motivo){
+  var t = CONFIG.tabela[S.grau];
+  var msg = 'Olá! Fiz a avaliação online.\n'+
+    'Nome: '+S.nome+'\nUnidade: '+S.cidade+'\nGrau (autoavaliação): '+t.nome+
+    (t.preco?'\nEstimativa: '+brl(t.preco[0])+' a '+brl(t.preco[1]):'')+
+    '\nFotos enviadas: '+Object.keys(S.fotos).length+'/5'+
+    (S.ia.data ? '\nPré-análise IA: '+(CONFIG.tabela[S.ia.data.grau]?CONFIG.tabela[S.ia.data.grau].nome:'indefinido')+' (confiança '+S.ia.data.confianca+')' : '')+
+    (motivo?'\nAntes de decidir: '+motivo.toLowerCase():'\nQuero garantir a condição do mês.');
+  return 'https://wa.me/'+CONFIG.whatsapp+'?text='+encodeURIComponent(msg);
+}
+
+function mask(v){ v=v.replace(/\D/g,'').slice(0,11); if(v.length>10) return '('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+  if(v.length>6) return '('+v.slice(0,2)+') '+v.slice(2,6)+'-'+v.slice(6); if(v.length>2) return '('+v.slice(0,2)+') '+v.slice(2); return v; }
+
+var BIND = {
+  intro: function(){ document.getElementById('start').addEventListener('click', function(){ track('quiz_start'); next(); }); },
+  tempo: bindChoice, idade: bindChoice,
+  grau: function(){ $app.querySelectorAll('.nw').forEach(function(b){ b.addEventListener('click', function(){
+    S.grau = b.dataset.v; track('quiz_answer',{q:'grau',a:S.grau}); setTimeout(next,180); }); }); },
+  fotos: function(){
+    $app.querySelectorAll('input[type=file]').forEach(function(inp){ inp.addEventListener('change', function(){
+      var f = inp.files && inp.files[0]; if(!f) return; S.blobs[inp.dataset.slot] = f; S.ia = {status:'idle'}; var r = new FileReader();
+      r.onload = function(){ var slot = inp.dataset.slot; S.fotos[slot] = r.result; track('photo_added',{slot:slot});
+        if (slot === 'cima') S.mk = {modo:'molde', cx:null, cy:null, sc:null, rot:null, ia:{status:'idle'}};
+        var im = new Image(); im.onload = function(){ S.dims[slot] = {w:im.naturalWidth, h:im.naturalHeight}; render(); }; im.onerror = render; im.src = r.result; };
+      r.readAsDataURL(f); }); });
+    var bIa = document.getElementById('ia-run'); if (bIa) bIa.addEventListener('click', rodarIA);
+    var bUse = document.getElementById('ia-use'); if (bUse) bUse.addEventListener('click', function(){ S.iaGrauOriginal = S.grau; S.grau = S.ia.data.grau; track('ia_grau_aceito',{grau:S.grau}); render(); });
+    document.getElementById('go-fotos').addEventListener('click', next);
+    document.getElementById('skip-fotos').addEventListener('click', function(){ track('photos_skipped'); next(); });
+  },
+  contato: function(){
+    var w = document.getElementById('whats');
+    w.addEventListener('input', function(){ w.value = mask(w.value); });
+    document.getElementById('form').addEventListener('submit', function(e){
+      e.preventDefault(); if (document.getElementById('_honey').value) return;
+      var nome = document.getElementById('nome').value.trim(), whats = w.value, cid = document.getElementById('cidade').value, ok = true;
+      document.getElementById('e-nome').textContent = nome.length<2 ? 'Digite seu nome.' : '';
+      document.getElementById('e-whats').textContent = whats.replace(/\D/g,'').length<10 ? 'Digite o número com DDD, ex.: (11) 91234-5678.' : '';
+      document.getElementById('e-cidade').textContent = cid ? '' : 'Escolha a unidade mais próxima.';
+      if (nome.length<2 || whats.replace(/\D/g,'').length<10 || !cid) ok = false;
+      if (!ok) return;
+      S.nome = nome; S.whats = whats; S.cidade = cid;
+      var p = payload(); track('generate_lead',{grau:S.grau});
+      if (CONFIG.endpoint) { try { fetch(CONFIG.endpoint,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)}).catch(function(){ track('lead_sheet_error'); }); } catch(_){} }
+      next();
+    });
+  },
+  resultado: function(){
+    track('quiz_complete',{grau:S.grau});
+    bindMarcacao();
+    document.getElementById('cta-com').addEventListener('click', function(){ S.decisao='comercial'; refreshPayload(); track('cta_comercial'); });
+    document.getElementById('cta-nao').addEventListener('click', function(){ S.decisao='nao_agora'; track('cta_nao_agora'); next(); });
+  },
+  objecao: function(){
+    $app.querySelectorAll('[data-obj]').forEach(function(b){ b.addEventListener('click', function(){ S.objecao=b.dataset.obj; track('objecao',{motivo:S.objecao}); render(); }); });
+    var g = document.getElementById('cta-grupo'); if (g) g.addEventListener('click', function(){ S.decisao='grupo'; refreshPayload(); track('cta_grupo'); });
+    var d = document.getElementById('cta-duv'); if (d) d.addEventListener('click', function(){ S.decisao='comercial_duvida'; refreshPayload(); track('cta_comercial_duvida'); });
+  }
+};
+
+/* ===== Pré-análise por IA =====
+   Hoje: motor do Claude dentro do Claude.ai (só para testes, roda na conta de quem abre).
+   Produção: preencha CONFIG.iaEndpoint com o seu backend. O resto da página não muda. */
+var ORDEM = [['frente','frente (testa e entradas)'],['cima','topo da cabeça visto de cima'],['nuca','nuca / parte de trás'],['lat-e','lateral esquerda'],['lat-d','lateral direita']];
+var IA_PROMPT = function(rotulos){ return [
+  'Você apoia a triagem de uma clínica de transplante capilar. Não é um diagnóstico: o médico confirma depois.',
+  'As imagens anexadas são de um homem, nesta ordem: ' + rotulos.join('; ') + '.',
+  'Classifique o padrão de calvície na escala de Hamilton-Norwood usando um destes valores: "1","2","3","3V","4","5","6","7".',
+  'Se as fotos não permitirem avaliar (desfocadas, cabelo preso, boné, ângulo errado), use "indefinido".',
+  'Avalie também a área doadora (nuca e laterais): "boa", "regular", "limitada" ou "indefinida".',
+  'Responda somente com JSON neste formato:',
+  '{"grau":"4","confianca":"alta|media|baixa","area_doadora":"boa","observacoes":"1 ou 2 frases em português, para a equipe comercial","fotos_problema":["nuca"]}'
+].join('\n'); };
+
+var sampleFn = null, iaLimites = null, iaPronto = false;
+(async function(){
+  try {
+    if (!window.claude) { iaPronto = true; return; }
+    sampleFn = await window.claude.use('sample');
+    if (sampleFn) iaLimites = await sampleFn.limits().catch(function(){ return null; });
+  } catch(_) {}
+  iaPronto = true;
+  if (steps[cur] === 'fotos') render();
+})();
+function iaDisponivel(){ return !!CONFIG.iaEndpoint || !!(sampleFn && iaLimites && iaLimites.images); }
+
+async function analisarFotos(arquivos, rotulos){
+  if (CONFIG.iaEndpoint) {
+    var fd = new FormData(); arquivos.forEach(function(f,i){ fd.append('foto_'+i, f); }); fd.append('rotulos', JSON.stringify(rotulos));
+    var r = await fetch(CONFIG.iaEndpoint, {method:'POST', body:fd});
+    if (!r.ok) throw {code:'upstream_error'};
+    return r.json();
+  }
+  return sampleFn.json(IA_PROMPT(rotulos), { images: arquivos, modelTier:'default' });
+}
+
+async function rodarIA(){
+  var sel = ORDEM.filter(function(o){ return S.blobs[o[0]]; });
+  if (!sel.length) return;
+  if (iaLimites && iaLimites.images && sel.length > iaLimites.images.maxCount) sel = sel.slice(0, iaLimites.images.maxCount);
+  S.ia = {status:'loading'}; render(); track('ia_start',{fotos:sel.length});
+  try {
+    var d = await analisarFotos(sel.map(function(o){ return S.blobs[o[0]]; }), sel.map(function(o){ return o[1]; }));
+    if (!d || typeof d !== 'object') throw {code:'invalid_json'};
+    d.grau = String(d.grau || 'indefinido').toUpperCase().replace('V','V');
+    if (!CONFIG.tabela[d.grau]) d.grau = 'indefinido';
+    var cf = String(d.confianca||'').toLowerCase().replace('é','e'); d.confianca = ['alta','media','baixa'].indexOf(cf) > -1 ? cf : 'baixa';
+    S.ia = {status:'done', data:d}; track('ia_done',{grau:d.grau, confianca:d.confianca});
+  } catch(e) {
+    var msgs = { not_granted:'A análise por IA não foi autorizada nesta visualização.', rate_limited:'Muitas análises seguidas. Tente de novo em alguns minutos.',
+      image_rejected:'Uma das fotos não pôde ser lida. Troque por outra em JPG ou PNG.', refused:'A IA não analisou essas imagens. Tente fotos mais nítidas.',
+      invalid_json:'A resposta veio fora do formato. Toque em analisar de novo.', sampling_disabled:'A IA não está disponível nesta conta.' };
+    if (e && e.code === 'cancelled') { S.ia = {status:'idle'}; }
+    else S.ia = {status:'error', msg: msgs[e && e.code] || 'Não foi possível analisar agora. Tente de novo.', fatal: e && (e.code==='not_granted'||e.code==='sampling_disabled')};
+    track('ia_error',{code:e && e.code});
+  }
+  if (steps[cur] === 'fotos') render(); else refreshPayload();
+}
+
+function iaBox(){
+  var n = Object.keys(S.blobs).length, ia = S.ia;
+  if (!iaPronto) return '';
+  if (!iaDisponivel()) return '<div class="ia"><div class="ia__top"><b>Pré-análise por IA</b><span class="badge-mvp">Teste</span></div><p>Disponível quando a página é aberta no Claude.ai ou quando o backend da API estiver configurado.</p></div>';
+  var h = '<div class="ia"><div class="ia__top"><b>Pré-análise por IA</b><span class="badge-mvp">Teste</span></div>';
+  if (ia.status === 'loading') return h + '<p class="dots">Analisando '+n+' foto'+(n>1?'s':'')+'. Pode levar até 1 minuto</p></div>';
+  if (ia.status === 'error') return h + '<p>'+ia.msg+'</p>'+(ia.fatal?'':'<button class="btn btn--ghost btn--sm" id="ia-run" type="button">Analisar de novo</button>')+'</div>';
+  if (ia.status === 'done') {
+    var d = ia.data, t = CONFIG.tabela[d.grau], dif = t && d.grau !== S.grau;
+    h += '<div class="ia__res">'+(t?head(d.grau):'')+'<div><strong>'+(t?t.nome+' sugerido':'Não foi possível classificar')+'</strong>'+
+      '<span class="pill pill--'+d.confianca+'">Confiança '+d.confianca+'</span> <span class="pill">Doadora: '+(d.area_doadora||'indefinida')+'</span></div></div>';
+    if (d.observacoes) h += '<p>'+String(d.observacoes).replace(/</g,'&lt;')+'</p>';
+    if (d.fotos_problema && d.fotos_problema.length) h += '<p>Refazer: '+d.fotos_problema.join(', ').replace(/</g,'&lt;')+'</p>';
+    if (dif) h += '<p>Você marcou '+(CONFIG.tabela[S.grau]?CONFIG.tabela[S.grau].nome:'outro grau')+'.</p><button class="btn btn--ghost btn--sm" id="ia-use" type="button">Usar o '+t.nome+' na estimativa</button>';
+    else if (S.iaGrauOriginal) h += '<p>Estimativa atualizada para o grau sugerido.</p>';
+    return h + '</div>';
+  }
+  if (!n) return h + '<p>Adicione as fotos para a IA sugerir o seu grau antes do médico confirmar.</p></div>';
+  return h + '<p>A IA compara suas fotos com a escala e sugere o grau e a qualidade da área doadora.</p><button class="btn btn--ghost btn--sm" id="ia-run" type="button">Analisar minhas '+n+' foto'+(n>1?'s':'')+'</button></div>';
+}
+
+/* ===== Marcação na foto de cima do paciente =====
+   Modo molde: a área do grau escolhido é sobreposta e o paciente arrasta/redimensiona.
+   Modo IA: a IA desenha as áreas a partir da própria foto (teste no Claude.ai ou backend em produção). */
+function vb(){ var d = S.dims.cima || {w:1000,h:1000}; return {w:1000, h:Math.round(1000 * d.h / d.w)}; }
+function mkDefaults(){ var v = vb(); if (S.mk.cx === null){ S.mk.cx = v.w/2; S.mk.cy = v.h/2; S.mk.sc = Math.min(v.w, v.h) * 0.0085; } if (S.mk.rot === null) S.mk.rot = CONFIG.rotacaoInicial || 0; }
+function normRot(r){ r = ((r % 360) + 540) % 360 - 180; return r; }
+function mkTransform(){ return 'translate('+S.mk.cx+' '+S.mk.cy+') rotate('+S.mk.rot+') scale('+S.mk.sc+') translate(-50 -58)'; }
+
+function overlayMolde(){
+  var id = 'o' + (uid++), z = zonas(S.grau, id, .55);
+  return '<defs>'+z.defs+'</defs><g id="mk-g" transform="'+mkTransform()+'">'+
+    '<ellipse cx="50" cy="58" rx="38" ry="46" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".6" stroke-dasharray="2 2"/>'+
+    '<path d="M46 9 L50 3 L54 9Z" fill="#fff" opacity=".8"/>'+ z.body +
+    '<path d="M24 24 Q50 9 76 24" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/>'+
+    '<path d="M24 24 Q50 9 76 24" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="3 2.5" stroke-linecap="round"/></g>';
+}
+function pts(arr){ var v = vb(); return arr.map(function(p){ return Math.round(p[0]*v.w)+','+Math.round(p[1]*v.h); }).join(' '); }
+function overlayIA(d){
+  var id = 'q' + (uid++), h = '<defs><pattern id="'+id+'x" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="14" fill="var(--plan)" opacity=".8"/></pattern></defs>';
+  if (d.frontal.length > 2) h += '<polygon points="'+pts(d.frontal)+'" fill="var(--plan)" fill-opacity=".5" stroke="var(--plan)" stroke-width="4" stroke-linejoin="round"/>';
+  if (d.coroa.length > 2) h += '<polygon points="'+pts(d.coroa)+'" fill="url(#'+id+'x)" stroke="var(--plan)" stroke-width="4" stroke-linejoin="round"/>';
+  if (d.linha_frontal.length > 1) h += '<polyline points="'+pts(d.linha_frontal)+'" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '<polyline points="'+pts(d.linha_frontal)+'" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="16 12" stroke-linecap="round" stroke-linejoin="round"/>';
+  return h;
+}
+
+function fotoMarcada(){
+  if (S.grau === '1') return '';
+  if (!S.fotos.cima) return '<div class="plan"><p class="plan__t">Veja a marcação na sua própria foto</p><p class="small">Volte à etapa das fotos e envie a foto de cima da cabeça para ver a área de tratamento sobre ela.</p><button class="btn btn--ghost btn--sm" type="button" id="mk-voltar">Enviar a foto de cima</button></div>';
+  var v = vb(), m = S.mk, ia = m.modo === 'ia' && m.ia.status === 'done';
+  mkDefaults();
+  var h = '<div class="plan"><p class="plan__t">Na sua foto</p>'+
+    '<div class="ph" style="aspect-ratio:'+v.w+' / '+v.h+'"><img src="'+S.fotos.cima+'" alt="Sua foto do topo da cabeça">'+
+    '<svg id="mk-svg" class="'+(ia?'is-ia':'')+'" viewBox="0 0 '+v.w+' '+v.h+'" preserveAspectRatio="none" aria-label="Marcação da área de tratamento sobre a sua foto">'+(ia ? overlayIA(m.ia.data) : overlayMolde())+'</svg>'+
+    (ia ? '' : '<div class="ph__hint">Arraste para encaixar o contorno. A setinha deve apontar para a sua testa.</div>')+'</div>';
+  h += '<div class="mk-ctrl">';
+  if (!ia) h += '<label for="mk-size">Tamanho<input type="range" id="mk-size" min="'+(Math.min(v.w,v.h)*0.004).toFixed(2)+'" max="'+(Math.min(v.w,v.h)*0.016).toFixed(2)+'" step="0.01" value="'+m.sc+'"></label>'+
+    '<label for="mk-rot">Rotação<input type="range" id="mk-rot" min="-180" max="180" step="1" value="'+normRot(m.rot)+'"></label>';
+  h += '<div class="mk-btns">';
+  if (!ia && m.ia.status !== 'loading') h += '<button class="btn btn--ghost btn--sm" type="button" id="mk-flip">Girar 180°</button>';
+  if (m.ia.status === 'loading') h += '<span class="small dots">A IA está marcando a sua foto</span>';
+  else if (ia) h += '<button class="btn btn--ghost btn--sm" type="button" id="mk-molde">Ajustar manualmente</button>';
+  else if (iaDisponivel() && !m.ia.fatal) h += '<button class="btn btn--ghost btn--sm" type="button" id="mk-ia">Marcar automaticamente com IA</button>';
+  h += '</div>';
+  if (m.ia.status === 'error') h += '<p class="small">'+m.ia.msg+'</p>';
+  if (ia && m.ia.data.obs) h += '<p class="small">'+String(m.ia.data.obs).replace(/</g,'&lt;')+'</p>';
+  h += '</div><p class="small">Marcação aproximada '+(ia?'feita por IA':'com base no '+CONFIG.tabela[S.grau].nome)+'. Não mostra como ficará o resultado: quem define a área e a nova linha frontal é o médico.</p></div>';
+  return h;
+}
+
+function bindMarcacao(){
+  var bv = document.getElementById('mk-voltar'); if (bv) bv.addEventListener('click', function(){ go(steps.indexOf('fotos')); });
+  var bi = document.getElementById('mk-ia'); if (bi) bi.addEventListener('click', marcarComIA);
+  var bm = document.getElementById('mk-molde'); if (bm) bm.addEventListener('click', function(){ S.mk.modo = 'molde'; render(); });
+  var svg = document.getElementById('mk-svg'), g = document.getElementById('mk-g'), sz = document.getElementById('mk-size');
+  if (!svg || !g) return;
+  var drag = null;
+  svg.addEventListener('pointerdown', function(e){ drag = {x:e.clientX, y:e.clientY, cx:S.mk.cx, cy:S.mk.cy}; svg.setPointerCapture(e.pointerId); });
+  svg.addEventListener('pointermove', function(e){ if (!drag) return; var r = svg.getBoundingClientRect(), v = vb();
+    S.mk.cx = drag.cx + (e.clientX - drag.x) * v.w / r.width; S.mk.cy = drag.cy + (e.clientY - drag.y) * v.h / r.height;
+    g.setAttribute('transform', mkTransform()); });
+  ['pointerup','pointercancel'].forEach(function(t){ svg.addEventListener(t, function(){ if (drag) track('mk_ajuste'); drag = null; }); });
+  if (sz) sz.addEventListener('input', function(){ S.mk.sc = parseFloat(sz.value); g.setAttribute('transform', mkTransform()); });
+  var rt = document.getElementById('mk-rot');
+  if (rt) rt.addEventListener('input', function(){ S.mk.rot = parseFloat(rt.value); g.setAttribute('transform', mkTransform()); });
+  var fl = document.getElementById('mk-flip');
+  if (fl) fl.addEventListener('click', function(){ S.mk.rot = normRot(S.mk.rot + 180); if (rt) rt.value = S.mk.rot; g.setAttribute('transform', mkTransform()); track('mk_flip'); });
+}
+
+function normPts(a){ return Array.isArray(a) ? a.filter(function(p){ return Array.isArray(p) && p.length >= 2 && isFinite(p[0]) && isFinite(p[1]); })
+  .map(function(p){ var x = +p[0], y = +p[1]; if (x > 1 || y > 1){ x /= 1000; y /= 1000; } return [Math.max(0,Math.min(1,x)), Math.max(0,Math.min(1,y))]; }) : []; }
+
+var MK_PROMPT = function(grau){ return [
+  'A imagem é uma foto do topo da cabeça de um homem, tirada de cima, para triagem de uma clínica de transplante capilar. Não é diagnóstico.',
+  'Grau estimado na escala de Hamilton-Norwood: ' + grau + '.',
+  'Marque na foto as regiões do couro cabeludo sem cabelo ou ralas que um transplante normalmente trataria nesse grau.',
+  'Use coordenadas normalizadas de 0 a 1, com origem no canto superior esquerdo da imagem como ela aparece (x para a direita, y para baixo).',
+  'Responda somente com JSON neste formato:',
+  '{"ok":true,"frontal":[[0.41,0.22],[0.55,0.20]],"coroa":[],"linha_frontal":[[0.35,0.30],[0.50,0.25],[0.65,0.30]],"obs":"uma frase curta em português"}',
+  'frontal: polígono de 8 a 16 pontos contornando entradas e região frontal sem cabelo. coroa: polígono de 8 a 16 pontos da área rala no topo de trás, ou [] se não houver.',
+  'linha_frontal: 5 a 9 pontos de uma nova linha frontal natural e conservadora, um pouco atrás da posição da juventude.',
+  'Se a foto não mostrar o couro cabeludo de forma avaliável, responda {"ok":false,"obs":"motivo"}.'
+].join('\n'); };
+
+async function marcarComIA(){
+  S.mk.modo = 'ia'; S.mk.ia = {status:'loading'}; render(); track('mk_ia_start');
+  try {
+    var d;
+    if (CONFIG.iaEndpoint) {
+      var fd = new FormData(); fd.append('foto', S.blobs.cima); fd.append('grau', S.grau); fd.append('tarefa', 'marcacao');
+      var r = await fetch(CONFIG.iaEndpoint, {method:'POST', body:fd}); if (!r.ok) throw {code:'upstream_error'}; d = await r.json();
+    } else {
+      d = await sampleFn.json(MK_PROMPT(CONFIG.tabela[S.grau].nome), { images: [S.blobs.cima], modelTier:'default' });
+    }
+    if (!d || d.ok === false) throw {code:'foto', obs: d && d.obs};
+    d = { frontal:normPts(d.frontal), coroa:normPts(d.coroa), linha_frontal:normPts(d.linha_frontal), obs:d.obs };
+    if (d.frontal.length < 3 && d.coroa.length < 3) throw {code:'foto'};
+    S.mk.ia = {status:'done', data:d}; track('mk_ia_done');
+  } catch(e) {
+    var c = e && e.code;
+    S.mk.modo = 'molde';
+    S.mk.ia = {status:'error', fatal: c==='not_granted'||c==='sampling_disabled',
+      msg: c==='foto' ? 'A IA não conseguiu marcar essa foto' + (e.obs ? ': '+String(e.obs).replace(/</g,'&lt;') : '') + '. Use o ajuste manual ou envie uma foto mais nítida.'
+         : c==='not_granted' ? 'A marcação por IA não foi autorizada nesta visualização.'
+         : c==='rate_limited' ? 'Muitas análises seguidas. Tente de novo em alguns minutos.'
+         : 'Não foi possível marcar agora. Use o ajuste manual ou tente de novo.'};
+    if (c === 'cancelled') S.mk.ia = {status:'idle'};
+    track('mk_ia_error',{code:c});
+  }
+  if (steps[cur] === 'resultado') render();
+}
+
+render();
+</script>
+
+</body>
+</html>
