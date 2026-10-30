@@ -300,7 +300,7 @@ function payload(){
   var t = CONFIG.tabela[S.grau] || {};
   return Object.assign({ token:CONFIG.token, nome:S.nome, whatsapp:S.whats, cidade:S.cidade,
     tempo_queda:S.tempo, idade:S.idade, grau_autoavaliado:S.grau,
-    enxertos_estimados:t.enx ? t.enx.join('–') : null,
+    foliculos_estimados:t.enx ? t.enx.join('–') : null,
     faixa_valor:t.preco ? t.preco.map(brl).join(' a ') : null,
     fotos_enviadas:Object.keys(S.fotos).length + '/5',
     ia_grau_sugerido:S.ia.data ? S.ia.data.grau : null, ia_confianca:S.ia.data ? S.ia.data.confianca : null,
@@ -387,7 +387,7 @@ var VIEWS = {
     } else {
       var parc = Math.round(t.preco[0] / CONFIG.parcelas);
       corpo = '<div class="rows">'+
-        '<div class="row"><span>Enxertos estimados</span><b>'+t.enx[0].toLocaleString('pt-BR')+' a '+t.enx[1].toLocaleString('pt-BR')+'</b></div>'+
+        '<div class="row"><span>Folículos estimados</span><b>'+t.enx[0].toLocaleString('pt-BR')+' a '+t.enx[1].toLocaleString('pt-BR')+'</b></div>'+
         '<div class="row row--big"><span>Investimento estimado</span><b>'+brl(t.preco[0])+' a '+brl(t.preco[1])+'</b></div>'+
         '<div class="row"><span>Parcelado</span><b>a partir de '+CONFIG.parcelas+'x de '+brl(parc)+'</b></div></div>'+
         '<div class="promo"><strong>'+CONFIG.promo.titulo+'</strong><span>'+CONFIG.promo.texto+'</span><em>Válida até '+fimDoMes()+'</em></div>'+

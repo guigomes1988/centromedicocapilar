@@ -2,7 +2,7 @@
 
 Quiz de avaliação online para leads de transplante capilar vindos do Meta Ads.
 O paciente responde algumas perguntas, se autoavalia na escala de Hamilton-Norwood,
-envia as 5 fotos (frente, cima, nuca e laterais) e vê na hora a estimativa de enxertos,
+envia as 5 fotos (frente, cima, nuca e laterais) e vê na hora a estimativa de folículos,
 a faixa de investimento e a condição do mês. No fim, escolhe entre falar com o comercial
 pelo WhatsApp ou entrar no grupo de condições especiais.
 
@@ -32,13 +32,13 @@ Tudo que muda mês a mês fica no objeto `CONFIG`, no início do `<script>`:
 | `promo` | Título e texto da condição do mês |
 | `parcelas` | Número de parcelas exibido no resultado |
 | `rotacaoInicial` | Rotação inicial do molde sobre a foto de cima (180 = testa para baixo) |
-| `tabela` | Enxertos e faixa de preço por grau |
+| `tabela` | Folículos e faixa de preço por grau |
 
 ### Pendências antes de publicar
 
 - [ ] Número do WhatsApp do comercial
 - [ ] Link do grupo
-- [ ] Tabela real de enxertos e preços por grau (os valores atuais são de exemplo)
+- [ ] Tabela real de folículos e preços por grau (os valores atuais são de exemplo)
 - [ ] Condição promocional do mês
 - [ ] Lista de unidades no campo "Unidade mais perto de você"
 - [ ] Endpoint do Apps Script
